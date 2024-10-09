@@ -1,10 +1,10 @@
+from abc import ABC
 from io import BytesIO
 
 import numpy as np
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from pathlib import Path
-
 
 # load and prepare the image
 def load_image(filename: str|BytesIO):
@@ -19,14 +19,23 @@ def load_image(filename: str|BytesIO):
     img = img - [123.68, 116.779, 103.939]
     return img
 
-
 BASE_PATH = Path(__file__).resolve().parent
 
+class IModel(ABC):
+    def predict(self, img):
+        pass
+
+class Model(IModel):
+    def __init__(self, model_path: str):
+        self.model = load_model(model_path)
+
+    def predict(self, img):
+        return self.model.predict(img)
 
 class Inference:
-    def __init__(self, logging, model_path: str):
+    def __init__(self, logging, model: IModel):
         self.logger = logging.getLogger(__name__)
-        self.model = load_model(model_path)
+        self.model = model
 
     def execute(self, filepath:str|BytesIO):
         img = load_image(filepath)

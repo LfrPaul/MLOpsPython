@@ -1,8 +1,11 @@
 import unittest
 from pathlib import Path
 import logging
+from unittest.mock import MagicMock
 
-from mlopspython_inference.inference_pillow import Inference
+import numpy as np
+
+from mlopspython_inference.inference_pillow import Inference, IModel
 
 BASE_PATH = Path(__file__).resolve().parent
 output_directory = BASE_PATH / "output"
@@ -11,7 +14,10 @@ input_directory = BASE_PATH / "input"
 class TestInference(unittest.TestCase):
 
     def test_inference(self):
-        inference = Inference(logging, str(input_directory / "model" / "final_model.h5"))
+        mock = MagicMock(IModel)
+        mock.predict.return_value = np.array([[1.0, 2.370240289845506e-30, 0.0]])
+
+        inference = Inference(logging, mock)
         inference_result = inference.execute(str(input_directory / "images" / "cat.png"))
 
         expected_result = {'prediction': 'Cat', 'values': [1.0, 2.370240289845506e-30, 0.0]}
